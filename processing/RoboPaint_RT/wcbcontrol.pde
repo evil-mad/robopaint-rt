@@ -27,6 +27,24 @@ void raiseBrush()
 
 
 
+void ConfigBrushDownHeight(int state) 
+{ 
+  // State 0: Wash      ConfigBrushDownHeight(0);// Set Brush to WASH height
+  // State 1: Paint     ConfigBrushDownHeight(1);// Set Brush to PAINT height
+
+  int position;
+
+  if (state == 0)
+    position = ServoWash;
+  else
+    position = ServoPaint;
+
+  myPort.write("SC,4," + str(position) + "\r");  // Brush DOWN position
+}
+
+
+
+
 void lowerBrush() 
 {
   int waitTime = NextMoveTime - millis();
@@ -66,9 +84,12 @@ void MoveRelativeXY(int xD, int yD)
 void cleanBrush()
 { 
 
+
   if (CleaningStatus < 0)
   { 
     CleaningStatus = 0;
+    ConfigBrushDownHeight(0);// Set Brush to WASH height
+
     getWater(0, true);
   }
   else if (CleaningStatus == 1)
@@ -89,8 +110,9 @@ void cleanBrush()
     selectedColor = 8; // No color selected. 
     brushColor = 8; // No paint on brush.  Use value 8, "water"
     redrawLocator();
+    ConfigBrushDownHeight(1);// Set Brush to PAINT height
 
-//    selectedWater = 2;
+    //    selectedWater = 2;
   }
 }  
 

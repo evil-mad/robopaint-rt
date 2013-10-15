@@ -154,17 +154,42 @@ void checkHighlights() {
     }
   }
 
+//
+//
+//  // Manage highlighting of text buttons
+//  if (mouseY >= MousePaperBottom)  
+//  {
+//    if ((mouseY <= height)  && (mouseX >=  (MousePaperLeft - 50)))
+//    { 
+//      if ((abs(mouseX - lastButtonUpdateX) + abs(mouseY - lastButtonUpdateY)) > 4)  
+//        redrawButtons();
+//      lastButtonUpdateX = mouseX;
+//      lastButtonUpdateY = mouseY;
+//    }
+//  }
+//  if (mouseY < MousePaperTop)  
+//    if ((mouseY > 0)  && (mouseX >=  (MousePaperLeft - 50)))
+//    { 
+//      if ((abs(mouseX - lastButtonUpdateX) + abs(mouseY - lastButtonUpdateY)) > 4)  
+//        redrawButtons();
+//      lastButtonUpdateX = mouseX;
+//      lastButtonUpdateY = mouseY;
+//    } 
+
 
 
   // Manage highlighting of text buttons
-  if (mouseY >= MousePaperBottom)  
+  if ((mouseY >= MousePaperBottom)  || (mouseY < MousePaperTop)  )
+  {
     if ((mouseY <= height)  && (mouseX >=  (MousePaperLeft - 50)))
     { 
-      if ((abs(mouseX - lastButtonUpdateX) + abs(mouseY - lastButtonUpdateY)) > 5)  
+//      if ((abs(mouseX - lastButtonUpdateX) + abs(mouseY - lastButtonUpdateY)) > 4)  
         redrawButtons();
-      lastButtonUpdateX = mouseX;
-      lastButtonUpdateY = mouseY;
-    } 
+//      lastButtonUpdateX = mouseX;
+//      lastButtonUpdateY = mouseY;
+    }
+  }
+
 
   if (doHighlightRedraw) {
     redrawHighlight();

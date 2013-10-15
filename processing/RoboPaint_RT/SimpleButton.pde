@@ -1,7 +1,6 @@
 
 // These keep track of all the buttons that there are
-static ArrayList buttonList;  // List of all buttons
-
+static ArrayList buttonList;  // List of all buttons 
 
 // Function to draw all of the buttons at once
 static void DrawButtons(PGraphics buffer) {
@@ -30,7 +29,7 @@ class SimpleButton
   PFont font;
   int fontSize;
   color displayColor;
-  color highlightColor;
+  color highlightColor; 
 
 
   SimpleButton( String label, int posX, int posY ) {
@@ -56,8 +55,7 @@ class SimpleButton
     this.font = font;
     this.fontSize = fontSize;
     this.displayColor = displayColor;
-    this.highlightColor = highlightColor;
-
+    this.highlightColor = highlightColor; 
     updateLabel(label);
 
     buttonList.add(this);
