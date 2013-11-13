@@ -39,7 +39,9 @@ void ConfigBrushDownHeight(int state)
   else
     position = ServoPaint;
 
-  myPort.write("SC,4," + str(position) + "\r");  // Brush DOWN position
+  if (SerialOnline) {
+    myPort.write("SC,4," + str(position) + "\r");  // Brush DOWN position
+  }
 }
 
 
@@ -58,7 +60,7 @@ void lowerBrush()
     if  (BrushDown == false)
     {      
       if (SerialOnline) {
-        myPort.write("SP,1\r");           
+        myPort.write("SP,1\r");           // Lower Brush
         BrushDown = true;
         NextMoveTime = millis() + delayAfterLoweringBrush;
         lastPosition = -1;
@@ -250,13 +252,11 @@ void MoveToXY()
     if ((MoveDestX < 0) || (MoveDestY < 0))
     { 
       // Destination has not been set up correctly.
-      // Re-initialize varaibles and prepare for next move.      
-      //      moveStatus = -1;
+      // Re-initialize varaibles and prepare for next move.  
       MoveDestX = -1;
       MoveDestY = -1;
     }
     else {
-
 
       moveStatus = -1;
       if (MoveDestX > MotorMaxX) 
@@ -279,15 +279,14 @@ void MoveToXY()
         MotorY = MoveDestY;
 
         int MaxTravel = max(abs(xD), abs(yD)); 
+        traveltime_ms = int(floor( float(1000 * MaxTravel)/MotorSpeed));
 
-        //        if (BrushDown)
-        //          traveltime_ms = int(ceil( float(1000 * MaxTravel)/MotorSpeedBrushDown));
-        //        else
-        //          traveltime_ms = int(ceil( float(1000 * MaxTravel)/MotorSpeedBrushUp));
 
-        traveltime_ms = int(ceil( float(1000 * MaxTravel)/MotorSpeed));
-
-        NextMoveTime = millis() + traveltime_ms; 
+        NextMoveTime = millis() + traveltime_ms -   ceil(1000 / frameRate);
+        // Important correction-- Start next segment sooner than you might expect,
+        // because of the relatively low framerate that the program runs at.
+      
+        
 
         if (SerialOnline) {
           if (reverseMotorX)
@@ -310,7 +309,24 @@ void MoveToXY()
       }
     }
   }
+  
+  // Need 
+  // SubsequentWaitTime
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 void getPaint()

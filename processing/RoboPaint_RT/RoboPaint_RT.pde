@@ -1,52 +1,49 @@
 /*
   RoboPaint RT
  
-  Real-time painting software for WaterColorBot
+ Real-time painting software for WaterColorBot
  
-  https://github.com/evil-mad/robopaint-rt 
+ https://github.com/evil-mad/robopaint-rt 
  
- 
- TODO: Add tooltips
  
  TODO: Water/Paint dish highlights may still have some oddities.
  
- TODO: Speed up redraw of highlights and button text (lower priority; no longer a major concern).
+ TODO: Speed up redraw of highlights and button text (major improvements have been made; no longer the primary concern).
+ 
  
  */
 
 import de.looksgood.ani.*;
 import processing.serial.*;
 
-
 import javax.swing.UIManager; 
 import javax.swing.JFileChooser; 
 
 
 // User Settings: 
-float MotorSpeed = 1500.0;  // Steps per second, default
+float MotorSpeed = 1000.0;  // Steps per second, 1500 default
 
 int ServoUpPct = 70;    // Brush UP position, %  (higher number lifts higher). 
 int ServoPaintPct = 30;    // Brush DOWN position, %  (higher number lifts higher). 
-int ServoWashPct = 20;    // Brush DOWN position, %  (higher number lifts higher). 
+int ServoWashPct = 20;    // Brush DOWN position for washing brush, %  (higher number lifts higher). 
 
 boolean reverseMotorX = false;
 boolean reverseMotorY = false;
+
 int delayAfterRaisingBrush = 300; //ms
 int delayAfterLoweringBrush = 300; //ms
 
 int ColorFadeDist = 1500;     // How slowly paint "fades" when drawing (higher number->Slower fading)
-int ColorFadeStart = 250;     // How far you can paint before  paint "fades" when drawing 
+int ColorFadeStart = 250;     // How far you can paint before paint "fades" when drawing 
 
 int minDist = 4; // Minimum drag distance to record
 
 
-
-
 boolean debugMode = true;
+//boolean debugMode = false;
 
 
 // Offscreen buffer images for holding drawn elements, makes redrawing MUCH faster
-
 
 PGraphics offScreen;
 
@@ -64,9 +61,8 @@ boolean segmentQueued = false;
 int queuePt1 = -1;
 int queuePt2 = -1;
 
-
 //float MotorStepsPerPixel =  16.75;  // For use with 1/16 steps
-float MotorStepsPerPixel = 8.36;// Good for 1/8 steps.
+float MotorStepsPerPixel = 8.36;// Good for 1/8 steps-- standard behavior.
 int xMotorPaperOffset =  1400;  // For 1/8 steps  Use 2900 for 1/16?
 
 // Positions of screen items
@@ -161,7 +157,8 @@ int lastX_DrawingPath;
 int lastY_DrawingPath;
 
 
-int NextMoveTime;
+int NextMoveTime;          //Time we are allowed to begin the next movement (i.e., when the current move will be complete).
+int SubsequentWaitTime = -1;    //How long the following movement will take.
 int UIMessageExpire;
 int raiseBrushStatus;
 int lowerBrushStatus;
@@ -234,7 +231,7 @@ void setup()
 
   shiftKeyDown = false;
 
-  frameRate(30);
+  frameRate(60);
 
 
   paintset[0] = Black;
@@ -260,9 +257,9 @@ void setup()
   //  }
 
 
-ServoUp = 7500 + 175 * ServoUpPct;    // Brush UP position, native units
-ServoPaint = 7500 + 175 * ServoPaintPct;   // Brush DOWN position, native units. 
-ServoWash = 7500 + 175 * ServoWashPct;     // Brush DOWN position, native units
+  ServoUp = 7500 + 175 * ServoUpPct;    // Brush UP position, native units
+  ServoPaint = 7500 + 175 * ServoPaintPct;   // Brush DOWN position, native units. 
+  ServoWash = 7500 + 175 * ServoWashPct;     // Brush DOWN position, native units
 
 
 
@@ -328,7 +325,6 @@ ServoWash = 7500 + 175 * ServoWashPct;     // Brush DOWN position, native units
     println(Serial.list());
     println("But I don't know which one to use. :(\n"); 
     println("Now entering offline simulation mode.\n");
-    
   }   
 
 
@@ -404,11 +400,11 @@ ServoWash = 7500 + 175 * ServoWashPct;     // Brush DOWN position, native units
   MousePaperLeft, MousePaperTop - 5, font_CB, 20, LabelColor, LabelColor);
 
 
-    if ( SerialOnline == false)
- {
-      UIMessage.label = "WaterColorBot not found.  Entering Simulation Mode. ";
-      UIMessageExpire = millis() + 5000;
- }
+  if ( SerialOnline == false)
+  {
+    UIMessage.label = "WaterColorBot not found.  Entering Simulation Mode. ";
+    UIMessageExpire = millis() + 5000;
+  }
 
 
 
@@ -545,8 +541,6 @@ boolean serviceBrush()
     // We still need to wait for *something* to finish!
   }
   else {
-
-
     if (raiseBrushStatus >= 0)
     {
       raiseBrush();
@@ -575,13 +569,8 @@ boolean serviceBrush()
       serviceStatus = true;
     }
   }
-
-
   return serviceStatus;
 }
-
-
-
 
 
 void drawToDoList()
@@ -807,7 +796,6 @@ void draw() {
   else
   {
 
-
     image(imgMain, 0, 0, width, height);    // Draw Background image  (incl. paint paths)
 
     // Draw buttons image
@@ -949,6 +937,8 @@ void mousePressed() {
   {  // Begin recording gesture   // Over paper!
     recordingGesture = true;
 
+    ToDoList = append(ToDoList, -30);   // Command Code:  -30 (raise brush)  (Only has an effect if the brush is already down.)
+
     ToDoList = append(ToDoList, xyEncodeInt2());    // Command Code: Move to first (X,Y) point
     ToDoList = append(ToDoList, -31);              // Command Code:  -31 (lower brush)
     doHighlightRedraw = true;
@@ -1037,8 +1027,6 @@ void mousePressed() {
   {
     // Save file with dialog #####
     selectOutput("Output .rrt file name:", "SavefileSelected");
-     
-    
   }
   else if ( openButton.isSelected() )  
   {
@@ -1055,12 +1043,9 @@ void SavefileSelected(File selection) {    // SAVE FILE
     // If a file was not selected
     println("No output file was selected...");
     //       ErrorDisplay = "ERROR: NO FILE NAME CHOSEN.";
-     
-      UIMessage.label = "File not saved (reason: no file name chosen).";
-      UIMessageExpire = millis() + 3000;
 
-    
-    
+    UIMessage.label = "File not saved (reason: no file name chosen).";
+    UIMessageExpire = millis() + 3000;
   } 
   else { 
 
@@ -1090,10 +1075,10 @@ void SavefileSelected(File selection) {    // SAVE FILE
     } 
 
     saveStrings(savePath, FileOutput);
-     
-     UIMessage.label = "File Saved!";
-      UIMessageExpire = millis() + 3000;
-    
+
+    UIMessage.label = "File Saved!";
+    UIMessageExpire = millis() + 3000;
+
 
     //    ErrorDisplay = "SAVING FILE...";
   }
@@ -1104,11 +1089,9 @@ void SavefileSelected(File selection) {    // SAVE FILE
 void fileSelected(File selection) {    // LOAD (OPEN) FILE
   if (selection == null) {
     println("Window was closed or the user hit cancel.");
-    
-          UIMessage.label = "File not loaded (reason: no file selected).";
-      UIMessageExpire = millis() + 3000;
-    
-    
+
+    UIMessage.label = "File not loaded (reason: no file selected).";
+    UIMessageExpire = millis() + 3000;
   } 
   else {
     //println("User selected " + selection.getAbsolutePath());

@@ -5,7 +5,7 @@
 
 // Manage checking if the brush needs servicing, and moving to the next path
 void checkServiceBrush() {
-  serviceBrush(); // Is this one actually needed if it's being called below?
+
   if (serviceBrush() == false)
 
     if (millis() > NextMoveTime)
@@ -22,61 +22,68 @@ void checkServiceBrush() {
 
         indexDone++;
       }
+      
 
 
       if (actionItem)
       {  // Perform next action from ToDoList::
 
-        //
-        //        intTemp = ToDoList[0];  
-        //        ToDoList = subset(ToDoList, 1); // Drop first element from ToDoList
-        //        DoneList = append(DoneList, intTemp); // Add the element to the end of DoneList
-
         if (segmentQueued)
-          drawQueuedSegment();
-
+          drawQueuedSegment();  // Draw path segment to screen
 
         if (intTemp >= 0)
-        { // Move the carriage to paint a path segment! 
-          // "This is where the magic happens..."
+        { // Move the carriage to paint a path segment!  ("This is where the magic happens....")
+
           int x2 = floor(intTemp / 10000);
           int y2 = intTemp - 10000 * x2;
 
           int x1 = round( float(x2 - MousePaperLeft) * MotorStepsPerPixel + xMotorPaperOffset);
           int y1 = round( float(y2 - MousePaperTop) * MotorStepsPerPixel); 
 
-
-          // TODO: Draw the segment that is being painted, here.
           MoveToXY(x1, y1);
-
 
           if (BrushDown == true) { 
             if (lastPosition == -1)
-              lastPosition = intTemp;
-            //            drawDoneSegment(lastPosition, intTemp); 
-
-            queueSegmentToDraw(lastPosition, intTemp); 
-            //          if (segmentQueued)
-            //        drawQueuedSegment();
-
-
+              lastPosition = intTemp; 
+            queueSegmentToDraw(lastPosition, intTemp);  
             lastPosition = intTemp;
           }
+
+          /*
+           IF next item in ToDoList is ALSO a move, then calculate the next move and queue it to the EBB at this time.
+           Save the duration of THAT move as "SubsequentWaitTime."
+           
+           When the first (pre-existing) move completes, we will check to see if SubsequentWaitTime is defined (i.e., >= 0).
+           If SubsequentWaitTime is defined, then (1) we add that value to the NextMoveTime:
+         
+           NextMoveTime = millis() + SubsequentWaitTime; 
+           SubsequentWaitTime = -1;
+           
+           We also (2) queue up that segment to be drawn.
+           
+           We also (3) queue up the next move, if there is one that could be queued.  We do 
+           
+           */
+           
+           
+           
+           
+           
+           
+           
+           
+           
         }
         else
         {
-          lastPosition = -1;  // For drawing DoneList
+          lastPosition = -1;  // For drawing 
 
           intTemp = -1 * intTemp;
 
           if ((intTemp > 9) && (intTemp < 20)) 
           {  // Change paint color  
-
             intTemp -= 10; 
-
             getPaint(intTemp);
-            //            color TempColor = paintset[intTemp];
-            //            stroke(color_for_new_ToDo_paths);
           }
           else if ((intTemp >= 20) && (intTemp < 30)) 
           {  // Get water from dish  
@@ -154,28 +161,6 @@ void checkHighlights() {
     }
   }
 
-//
-//
-//  // Manage highlighting of text buttons
-//  if (mouseY >= MousePaperBottom)  
-//  {
-//    if ((mouseY <= height)  && (mouseX >=  (MousePaperLeft - 50)))
-//    { 
-//      if ((abs(mouseX - lastButtonUpdateX) + abs(mouseY - lastButtonUpdateY)) > 4)  
-//        redrawButtons();
-//      lastButtonUpdateX = mouseX;
-//      lastButtonUpdateY = mouseY;
-//    }
-//  }
-//  if (mouseY < MousePaperTop)  
-//    if ((mouseY > 0)  && (mouseX >=  (MousePaperLeft - 50)))
-//    { 
-//      if ((abs(mouseX - lastButtonUpdateX) + abs(mouseY - lastButtonUpdateY)) > 4)  
-//        redrawButtons();
-//      lastButtonUpdateX = mouseX;
-//      lastButtonUpdateY = mouseY;
-//    } 
-
 
 
   // Manage highlighting of text buttons
@@ -183,17 +168,13 @@ void checkHighlights() {
   {
     if ((mouseY <= height)  && (mouseX >=  (MousePaperLeft - 50)))
     { 
-//      if ((abs(mouseX - lastButtonUpdateX) + abs(mouseY - lastButtonUpdateY)) > 4)  
-        redrawButtons();
-//      lastButtonUpdateX = mouseX;
-//      lastButtonUpdateY = mouseY;
+      redrawButtons();
     }
   }
 
 
   if (doHighlightRedraw) {
     redrawHighlight();
-    //    redrawButtons();
   }
 }
 
