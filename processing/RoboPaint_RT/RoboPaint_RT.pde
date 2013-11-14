@@ -19,7 +19,7 @@ import javax.swing.JFileChooser;
 
 
 // User Settings: 
-float MotorSpeed = 1000.0;  // Steps per second, 1500 default
+float MotorSpeed = 1500.0;  // Steps per second, 1500 default
 
 int ServoUpPct = 70;    // Brush UP position, %  (higher number lifts higher). 
 int ServoPaintPct = 30;    // Brush DOWN position, %  (higher number lifts higher). 
@@ -262,39 +262,47 @@ void setup()
   int PortCount = Serial.list().length;
   int PortNumber = -1;
 
+//    println("\nI found "+PortCount+" serial ports, which are:");
+//    println(Serial.list());
+
   String str1, str2;
   int j;
   String os=System.getProperty("os.name").toLowerCase();
 
   boolean isMacOs = os.startsWith("mac os x");
+  boolean isWin = os.startsWith("win");
+  String portName;
+
   if (isMacOs) 
   {
-
     str1 = "/dev/tty.usbmodem";       // Can change to be the name of the port you want, e.g., COM5.
     // The default value is "/dev/cu.usbmodem"; which works on Macs.
-
 
     str1 = str1.substring(0, 14);
 
     j = 0;
-    while (j < (PortCount - 1)) {
+    while (j < (PortCount)) {
       str2 = Serial.list()[j].substring(0, 14);
       if (str1.equals(str2) == true)
         PortNumber = j;
       j++;
     }
-
-    // do mac-specific things here
   }
+
+  else if  (isWin) 
+  {     // do windows-specific things here
+    // Only currently available ports will be listed.
+    j = PortCount;
+  }
+
   else {
-    // Assume linux for the time being.
+    // Assume linux
 
     str1 = "/dev/ttyACM"; 
-
     str1 = str1.substring(0, 11);
 
     j = 0;
-    while (j < (PortCount - 1)) {
+    while (j < (PortCount)) {
       str2 = Serial.list()[j].substring(0, 11);
       if (str1.equals(str2) == true)
         PortNumber = j;
@@ -304,15 +312,40 @@ void setup()
   SerialOnline = false;
 
   if (PortNumber >= 0)
-  { 
-    String portName = Serial.list()[PortNumber];
+  {   // We have a likely suspect of our port name, for Mac/Lin.
+    portName = Serial.list()[PortNumber];
     myPort = new Serial(this, portName, 38400);
     myPort.buffer(1);
     myPort.clear(); 
-    println("Serial port "+Serial.list()[PortNumber]+" found and activated.");
+    println("Serial port "+portName+" found and activated.");
     SerialOnline = true;
   } 
-  else
+  else {  // For Windows: Try available ports, sequentially. 
+
+    j = 0;
+    while (j < PortCount) {
+
+
+      portName = Serial.list()[j];
+      try
+      {      
+        myPort = new Serial(this, portName, 38400);
+        myPort.buffer(1);
+        myPort.clear(); 
+        println("Serial port "+portName+" found and activated.");
+        SerialOnline = true;
+        j =  PortCount; // Break out of loop
+      }
+      catch (Exception e)
+      {
+        SerialOnline = false;
+      }
+
+      j++;
+    }
+  }
+
+  if (SerialOnline == false)
   {
     println("\nI found "+PortCount+" serial ports, which are:");
     println(Serial.list());
