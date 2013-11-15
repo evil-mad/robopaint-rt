@@ -5,9 +5,13 @@
  
  https://github.com/evil-mad/robopaint-rt 
  
+ Requires: 
+ 
  TODO: Water/Paint dish highlights may still have some oddities.
  
  TODO: Speed up redraw of highlights and button text (major improvements have been made; no longer the primary concern).
+ 
+ 
  
  */
 
@@ -108,6 +112,7 @@ color Black = color(25, 25, 25);  // BLACK
 color Water = color(230, 230, 255);  // BLUE 
 
 boolean firstPath;
+boolean doSerialConnect = true;
 boolean SerialOnline;
 Serial myPort;  // Create object from Serial class
 int val;        // Data received from the serial port
@@ -224,7 +229,7 @@ void setup()
 
   shiftKeyDown = false;
 
-  frameRate(60);
+  frameRate(60);  // sets maximum speed only
 
 
   paintset[0] = Black;
@@ -256,124 +261,6 @@ void setup()
 
 
 
-
-
-  // Serial port search string:  
-  int PortCount = Serial.list().length;
-  int PortNumber = -1;
-
-//    println("\nI found "+PortCount+" serial ports, which are:");
-//    println(Serial.list());
-
-  String str1, str2;
-  int j;
-  String os=System.getProperty("os.name").toLowerCase();
-
-  boolean isMacOs = os.startsWith("mac os x");
-  boolean isWin = os.startsWith("win");
-  String portName;
-
-  if (isMacOs) 
-  {
-    str1 = "/dev/tty.usbmodem";       // Can change to be the name of the port you want, e.g., COM5.
-    // The default value is "/dev/cu.usbmodem"; which works on Macs.
-
-    str1 = str1.substring(0, 14);
-
-    j = 0;
-    while (j < (PortCount)) {
-      str2 = Serial.list()[j].substring(0, 14);
-      if (str1.equals(str2) == true)
-        PortNumber = j;
-      j++;
-    }
-  }
-
-  else if  (isWin) 
-  {     // do windows-specific things here
-    // Only currently available ports will be listed.
-    j = PortCount;
-  }
-
-  else {
-    // Assume linux
-
-    str1 = "/dev/ttyACM"; 
-    str1 = str1.substring(0, 11);
-
-    j = 0;
-    while (j < (PortCount)) {
-      str2 = Serial.list()[j].substring(0, 11);
-      if (str1.equals(str2) == true)
-        PortNumber = j;
-      j++;
-    }
-  }
-  SerialOnline = false;
-
-  if (PortNumber >= 0)
-  {   // We have a likely suspect of our port name, for Mac/Lin.
-    portName = Serial.list()[PortNumber];
-    myPort = new Serial(this, portName, 38400);
-    myPort.buffer(1);
-    myPort.clear(); 
-    println("Serial port "+portName+" found and activated.");
-    SerialOnline = true;
-  } 
-  else {  // For Windows: Try available ports, sequentially. 
-
-    j = 0;
-    while (j < PortCount) {
-
-
-      portName = Serial.list()[j];
-      try
-      {      
-        myPort = new Serial(this, portName, 38400);
-        myPort.buffer(1);
-        myPort.clear(); 
-        println("Serial port "+portName+" found and activated.");
-        SerialOnline = true;
-        j =  PortCount; // Break out of loop
-      }
-      catch (Exception e)
-      {
-        SerialOnline = false;
-      }
-
-      j++;
-    }
-  }
-
-  if (SerialOnline == false)
-  {
-    println("\nI found "+PortCount+" serial ports, which are:");
-    println(Serial.list());
-    println("But I don't know which one to use. :(\n"); 
-    println("Now entering offline simulation mode.\n");
-  }   
-
-
-
-
-
-
-
-  if (SerialOnline)
-  {    
-    myPort.write("EM,2\r");  //Configure both steppers to 1/8 step mode
-
-      // Configure brush lift servo endpoints and speed
-    myPort.write("SC,4," + str(ServoPaint) + "\r");  // Brush DOWN position, for painting
-    myPort.write("SC,5," + str(ServoUp) + "\r");  // Brush UP position 
-
-    //    myPort.write("SC,10,255\r"); // Set brush raising and lowering speed.
-    myPort.write("SC,10,65535\r"); // Set brush raising and lowering speed.
-  }
-
-  // Ensure that we actually raise the brush:
-  BrushDown = true;  
-  raiseBrush();    
 
   // Button setup
 
@@ -426,11 +313,10 @@ void setup()
   MousePaperLeft, MousePaperTop - 5, font_CB, 20, LabelColor, LabelColor);
 
 
-  if ( SerialOnline == false)
-  {
-    UIMessage.label = "WaterColorBot not found.  Entering Simulation Mode. ";
-    UIMessageExpire = millis() + 5000;
-  }
+
+
+  UIMessage.label = "Searching For WaterColorBot... ";
+  UIMessageExpire = millis() + 25000; 
 
   rectMode(CORNERS);
 
@@ -482,8 +368,6 @@ void setup()
   redrawButtons();
   redrawHighlight();
   redrawLocator();
-
-  UIMessageExpire = millis() + 5000;
 }
 
 
@@ -777,7 +661,11 @@ void draw() {
   drawToDoList();
 
   // NON-DRAWING LOOP CHECKS ==========================================
-  checkServiceBrush(); 
+
+  if (doSerialConnect == false)
+    checkServiceBrush(); 
+
+
   checkHighlights();
 
   if (UIMessage.label != "")
@@ -813,6 +701,46 @@ void draw() {
 
     // Draw locator crosshair at xy pos, less crosshair offset
     image(imgLocator, MotorLocatorX-10, MotorLocatorY-15);
+  }
+
+
+  if (doSerialConnect)
+  {
+    // FIRST RUN ONLY:  Connect here, so that 
+
+      doSerialConnect = false;
+
+    scanSerial();
+
+    if (SerialOnline)
+    {    
+      myPort.write("EM,2\r");  //Configure both steppers to 1/8 step mode
+
+        // Configure brush lift servo endpoints and speed
+      myPort.write("SC,4," + str(ServoPaint) + "\r");  // Brush DOWN position, for painting
+      myPort.write("SC,5," + str(ServoUp) + "\r");  // Brush UP position 
+
+      //    myPort.write("SC,10,255\r"); // Set brush raising and lowering speed.
+      myPort.write("SC,10,65535\r"); // Set brush raising and lowering speed.
+
+
+      // Ensure that we actually raise the brush:
+      BrushDown = true;  
+      raiseBrush();    
+
+      UIMessage.label = "Welcome to RoboPaint RT!  Hold 'h' key for help!";
+      UIMessageExpire = millis() + 5000;
+      println("Now entering interactive painting mode.\n");
+      redrawButtons();
+    }
+    else
+    { 
+      println("Now entering offline simulation mode.\n");
+
+      UIMessage.label = "WaterColorBot not found.  Entering Simulation Mode. ";
+      UIMessageExpire = millis() + 5000;
+      redrawButtons();
+    }
   }
 }
 
