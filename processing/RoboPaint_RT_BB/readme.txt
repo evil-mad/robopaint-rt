@@ -17,7 +17,7 @@ If carriage does not begin in UPPER LEFT corner, press "motors off", manually mo
 
 
 Known issues:
-Please see: https://github.com/evil-mad/robopaint-rt/issues?state=open
+https://github.com/evil-mad/robopaint-rt/issues?state=open
 
 
 No help file
