@@ -208,9 +208,54 @@ SimpleButton brushLabel;
 SimpleButton motorLabel;
 SimpleButton UIMessage;
 
+int offset_left = 0;
+int offset_top = 0;
+float resize_factor = 1;
+
 void setup() 
 {
-  size(800, 519);
+  //size(800, 519);
+  fullScreen();
+  
+  
+  //calculate where to put background
+  if(height/519<width/800) {
+    //top offset
+    resize_factor = (float) (width)/800;
+    offset_top = (height-(int)(resize_factor*519))/2;
+  } else {
+    //left offset
+    resize_factor = (float)(height)/519;
+    offset_left = (width-(int)(resize_factor*800))/2;
+    
+  }
+  
+  MotorStepsPerPixel = MotorStepsPerPixel/resize_factor;
+  
+  MousePaperLeft =  (int)(185*resize_factor);
+  MousePaperRight =  (int)(769*resize_factor);
+  MousePaperTop =  (int)(62*resize_factor);
+  MousePaperBottom =  (int)(488*resize_factor);
+  
+  paintSwatchX = (108.8*resize_factor);
+  paintSwatchY0 = (84.5*resize_factor);
+  paintSwatchyD = (54.55*resize_factor);
+  paintSwatchOvalWidth = (int)(64*resize_factor);
+  paintSwatchOvalheight = (int)(47*resize_factor);
+  
+  WaterDishX = (int)(2*resize_factor);
+  WaterDishY0 = (int)(88*resize_factor);
+  WaterDishyD = (161.25*resize_factor);
+  WaterDishDia = (int)(118*resize_factor);
+
+  xMotorOffsetPixels = 0;  // Corrections to initial motor position w.r.t. lower plate (paints & paper)
+  yMotorOffsetPixels = (int)(3*resize_factor) ;
+
+  xBrushRestPositionPixels = (int)(18*resize_factor)+offset_left;     // Brush rest position, in pixels
+  yBrushRestPositionPixels = MousePaperTop + yMotorOffsetPixels+offset_top;
+  
+  minDist = (int)(4*resize_factor);
+
 
   Ani.init(this); // Initialize animation library
   Ani.setDefaultEasing(Ani.LINEAR);
@@ -218,14 +263,14 @@ void setup()
 
   firstPath = true;
 
-  offScreen = createGraphics(800, 519, JAVA2D);
+  offScreen = createGraphics(width-2*offset_left, height-2*offset_top, JAVA2D);
 
   //// Allow frame to be resized?
   //  if (frame != null) {
   //    frame.setResizable(true);
   //  }
 
-  frame.setTitle("RoboPaint RT");
+  surface.setTitle("RoboPaint RT");
 
   shiftKeyDown = false;
 
@@ -271,46 +316,46 @@ void setup()
 
 
   int xbutton = MousePaperLeft;
-  int ybutton = MousePaperBottom + 20;
+  int ybutton = MousePaperBottom + (int)(20*resize_factor);
 
-  pauseButton = new SimpleButton("Pause", xbutton, MousePaperBottom + 20, font_CB, 20, TextColor, TextHighLight);
-  xbutton += 60; 
+  pauseButton = new SimpleButton("Pause", xbutton, MousePaperBottom + (int)(20*resize_factor), font_CB, (int)(20*resize_factor), TextColor, TextHighLight);
+  xbutton += (int)(60*resize_factor); 
 
-  brushLabel = new SimpleButton("Brush:", xbutton, ybutton, font_CB, 20, LabelColor, LabelColor);
-  xbutton += 45;
-  brushUpButton = new SimpleButton("Up", xbutton, ybutton, font_CB, 20, TextColor, TextHighLight);
-  xbutton += 22;
-  brushDownButton = new SimpleButton("Down", xbutton, ybutton, font_CB, 20, TextColor, TextHighLight);
-  xbutton += 44;
+  brushLabel = new SimpleButton("Brush:", xbutton, ybutton, font_CB, (int)(20*resize_factor), LabelColor, LabelColor);
+  xbutton += (int)(45*resize_factor);
+  brushUpButton = new SimpleButton("Up", xbutton, ybutton, font_CB, (int)(20*resize_factor), TextColor, TextHighLight);
+  xbutton += (int)(22*resize_factor);
+  brushDownButton = new SimpleButton("Down", xbutton, ybutton, font_CB, (int)(20*resize_factor), TextColor, TextHighLight);
+  xbutton += (int)(44*resize_factor);
 
-  cleanButton = new SimpleButton("Clean", xbutton, ybutton, font_CB, 20, TextColor, TextHighLight);
-  xbutton += 44;
-  parkButton = new SimpleButton("Park", xbutton, ybutton, font_CB, 20, TextColor, TextHighLight);
-  xbutton += 60;
+  cleanButton = new SimpleButton("Clean", xbutton, ybutton, font_CB, (int)(20*resize_factor), TextColor, TextHighLight);
+  xbutton += (int)(44*resize_factor);
+  parkButton = new SimpleButton("Park", xbutton, ybutton, font_CB, (int)(20*resize_factor), TextColor, TextHighLight);
+  xbutton += (int)(60*resize_factor);
 
-  motorLabel = new SimpleButton("Motors:", xbutton, ybutton, font_CB, 20, LabelColor, LabelColor);
-  xbutton += 55;
-  motorOffButton = new SimpleButton("Off", xbutton, ybutton, font_CB, 20, TextColor, TextHighLight);
-  xbutton += 30;
-  motorZeroButton = new SimpleButton("Zero", xbutton, ybutton, font_CB, 20, TextColor, TextHighLight);
-  xbutton += 70;
-  clearButton = new SimpleButton("Clear All", xbutton, MousePaperBottom + 20, font_CB, 20, TextColor, TextHighLight);
-  xbutton += 80;
-  replayButton = new SimpleButton("Replay All", xbutton, MousePaperBottom + 20, font_CB, 20, TextColor, TextHighLight);
+  motorLabel = new SimpleButton("Motors:", xbutton, ybutton, font_CB, (int)(20*resize_factor), LabelColor, LabelColor);
+  xbutton += (int)(55*resize_factor);
+  motorOffButton = new SimpleButton("Off", xbutton, ybutton, font_CB, (int)(20*resize_factor), TextColor, TextHighLight);
+  xbutton += (int)(30*resize_factor);
+  motorZeroButton = new SimpleButton("Zero", xbutton, ybutton, font_CB, (int)(20*resize_factor), TextColor, TextHighLight);
+  xbutton += (int)(70*resize_factor);
+  clearButton = new SimpleButton("Clear All", xbutton, MousePaperBottom + (int)(20*resize_factor), font_CB, (int)(20*resize_factor), TextColor, TextHighLight);
+  xbutton += (int)(80*resize_factor);
+  replayButton = new SimpleButton("Replay All", xbutton, MousePaperBottom + (int)(20*resize_factor), font_CB, (int)(20*resize_factor), TextColor, TextHighLight);
 
   xbutton = MousePaperLeft - 30;   
-  ybutton =  30;
+  ybutton =  (int)(30*resize_factor);
 
-  openButton = new SimpleButton("Open File", xbutton, ybutton, font_url, 16, LabelColor, TextHighLight); 
-  xbutton += 80;
-  saveButton = new SimpleButton("Save File", xbutton, ybutton, font_url, 16, LabelColor, TextHighLight);
+  openButton = new SimpleButton("Open File", xbutton, ybutton, font_url, (int)(16*resize_factor), LabelColor, TextHighLight); 
+  xbutton += (int)(80*resize_factor);
+  saveButton = new SimpleButton("Save File", xbutton, ybutton, font_url, (int)(16*resize_factor), LabelColor, TextHighLight);
 
-  xbutton = 655;
+  xbutton = (int)(655*resize_factor);
 
-  urlButton = new SimpleButton("WaterColorBot.com", xbutton, ybutton, font_url, 16, LabelColor, TextHighLight);
+  urlButton = new SimpleButton("WaterColorBot.com", xbutton, ybutton, font_url, (int)(16*resize_factor), LabelColor, TextHighLight);
 
   UIMessage = new SimpleButton("Welcome to RoboPaint RT! Hold 'h' key for help!", 
-  MousePaperLeft, MousePaperTop - 5, font_CB, 20, LabelColor, LabelColor);
+  MousePaperLeft, MousePaperTop - (int)(5*resize_factor), font_CB, (int)(20*resize_factor), LabelColor, LabelColor);
 
 
 
@@ -358,7 +403,7 @@ void setup()
   // Set initial position of indicator at carriage minimum 0,0
   int[] pos = getMotorPixelPos();
 
-  background(255);
+  background(0);
   MotorLocatorX = pos[0];
   MotorLocatorY = pos[1];
 
@@ -500,9 +545,9 @@ void drawToDoList()
     offScreen.beginDraw();
 
     if (indexDrawn < 0)
-      offScreen.image(imgBackground, 0, 0);  // Copy original background image into place!
+      offScreen.image(imgBackground, 0, 0, offScreen.width,offScreen.height);  // Copy original background image into place!
     else
-      offScreen.image(imgMain, 0, 0);
+      offScreen.image(imgMain, 0, 0, offScreen.width,offScreen.height);
 
 
     offScreen.strokeWeight(10); 
@@ -595,7 +640,7 @@ void drawToDoList()
         }
       }
     }
-
+    
     offScreen.endDraw();
 
     imgMain = offScreen.get(0, 0, offScreen.width, offScreen.height);
@@ -622,7 +667,7 @@ void drawQueuedSegment()
     segmentQueued = false;
 
     offScreen.beginDraw();     // Ready the offscreen buffer for drawing
-    offScreen.image(imgMain, 0, 0);
+    offScreen.image(imgMain, 0, 0, offScreen.width, offScreen.height);
     offScreen.strokeWeight(11); 
 
     interA = paintset[brushColor];
@@ -686,18 +731,18 @@ void draw() {
 
   if  (hKeyDown)
   {  // Help display
-    image(loadImage(HelpImageName), 0, 0);
+    image(loadImage(HelpImageName), offset_left, offset_top, 800*resize_factor, 519*resize_factor);
   }
   else
   {
 
-    image(imgMain, 0, 0, width, height);    // Draw Background image  (incl. paint paths)
+    image(imgMain, offset_left, offset_top, 800*resize_factor, 519*resize_factor);    // Draw Background image  (incl. paint paths)
 
     // Draw buttons image
-    image(imgButtons, 0, 0);
+    image(imgButtons, offset_left, offset_top);
 
     // Draw highlight image
-    image(imgHighlight, 0, 0);
+    image(imgHighlight, offset_left, offset_top);
 
     // Draw locator crosshair at xy pos, less crosshair offset
     image(imgLocator, MotorLocatorX-10, MotorLocatorY-15);
@@ -800,7 +845,7 @@ void redrawHighlight() {
   }
 
   offScreen.endDraw();
-  imgHighlight = offScreen.get(0, 0, offScreen.width, offScreen.height);
+  imgHighlight = offScreen.get(0, 0, width, height);
 }
 
 
@@ -861,7 +906,7 @@ void mousePressed() {
 
     ColorDistance = 0;
   }
-  else  if ((mouseX >= MousePaperLeft) && (mouseX <= MousePaperRight) && (mouseY >= MousePaperTop) && (mouseY <= MousePaperBottom))
+  else  if ((mouseX >= MousePaperLeft + offset_left) && (mouseX <= MousePaperRight + offset_left) && (mouseY >= MousePaperTop + offset_top) && (mouseY <= MousePaperBottom + offset_top))
   {  // Begin recording gesture   // Over paper!
     recordingGesture = true;
 
@@ -1245,4 +1290,3 @@ void keyPressed()
       MotorSpeed = 2000;
   }
 }
-

@@ -6,8 +6,8 @@ int xyEncodeInt2() {
   // Constrain inputs to be within range of paper size, but all numbers are w.r.t. absolute window origin.
   // This is essentially only called when the mouse position changes.
 
-  int xpos = mouseX;
-  int ypos = mouseY;
+  int xpos = mouseX-offset_left;
+  int ypos = mouseY-offset_top;
 
   if (xpos < MousePaperLeft)
     xpos = MousePaperLeft;
@@ -16,7 +16,7 @@ int xyEncodeInt2() {
 
   if (ypos < MousePaperTop)
     ypos = MousePaperTop;
-  if (ypos > MousePaperBottom )
+  if (ypos > MousePaperBottom)
     ypos = MousePaperBottom;
 
   return (xpos * 10000) + ypos ;
@@ -224,12 +224,3 @@ void scanSerial()
     }
   }
 }
-
-
-
-
-
-
-
-
-

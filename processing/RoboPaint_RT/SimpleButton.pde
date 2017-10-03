@@ -101,10 +101,9 @@ class SimpleButton
 
   boolean overRect(float x, float y, float width, float height) 
   {
-    if (mouseX >= x && mouseX <= x+width &&  mouseY >= y && mouseY <= y+height) 
+    if (mouseX >= x + offset_left && mouseX <= x+width+offset_left &&  mouseY >= y+offset_top && mouseY <= y+height+offset_top) 
       return true; 
     else 
       return false;
   }
 }
-
