@@ -80,7 +80,6 @@ void scanSerial()
 
   // Serial port search string:  
   int PortCount = 0;
-  int PortNumber = -1;
   String portName;
   String str1, str2;
   int j;
@@ -106,8 +105,8 @@ void scanSerial()
   if (serialErr == false)
   {
 
-    println("\nI found "+PortCount+" serial ports, which are:");
-    println(Serial.list());
+    //println("\nI found "+PortCount+" serial ports, which are:");
+    //println(Serial.list());
 
 
     String  os=System.getProperty("os.name").toLowerCase();
@@ -179,14 +178,14 @@ void scanSerial()
       {
         SerialOnline = false;
         portErr = true;
-        println("Serial port "+portName+" could not be activated.");
+        //println("Serial port "+portName+" could not be activated.");
       }
 
       if (portErr == false)
       {
         myPort.buffer(1);
         myPort.clear(); 
-        println("Serial port "+portName+" found and activated.");
+        //println("Serial port "+portName+" found and activated.");
 
         String inBuffer = "";
 
@@ -196,12 +195,12 @@ void scanSerial()
         while (myPort.available () > 0) {
           inBuffer = myPort.readString();   
           if (inBuffer != null) {
-            println("Version Number: "+inBuffer);
+            //println("Version Number: "+inBuffer);
           }
         }
 
         str1 = "EBB";
-        if (inBuffer.length() > 2)
+        if (inBuffer!=null && inBuffer.length() > 2)
         {
           str2 = inBuffer.substring(0, 3); 
           if (str1.equals(str2) == true)
@@ -210,13 +209,13 @@ void scanSerial()
             SerialOnline = true;    // confirm that this port is good
             j = OpenPortList.length; // break out of loop
 
-            println("Serial port "+portName+" confirmed to have EBB.");
+            //println("Serial port "+portName+" confirmed to have EBB.");
           }
           else
           {
             myPort.clear(); 
             myPort.stop();
-            println("Serial port "+portName+": No EBB detected.");
+            //println("Serial port "+portName+": No EBB detected.");
           }
         }
       }

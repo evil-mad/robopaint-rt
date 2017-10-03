@@ -340,7 +340,6 @@ void getPaint()
 
 
     int paintColor = PaintDest;
-    boolean done = false;
     //    if (debugMode) println("Get Paint!  Color: " + paintColor);
 
 

@@ -775,12 +775,12 @@ void draw() {
 
       UIMessage.label = "Welcome to RoboPaint RT!  Hold 'h' key for help!";
       UIMessageExpire = millis() + 5000;
-      println("Now entering interactive painting mode.\n");
+      //println("Now entering interactive painting mode.\n");
       redrawButtons();
     }
     else
     { 
-      println("Now entering offline simulation mode.\n");
+      //println("Now entering offline simulation mode.\n");
 
       UIMessage.label = "WaterColorBot not found.  Entering Simulation Mode. ";
       UIMessageExpire = millis() + 5000;
@@ -878,7 +878,6 @@ void redrawLocator() {
 
 void mousePressed() {
   int i;
-  int x1, x2, y1, y2;
   boolean doHighlightRedraw = false;
 
   //The mouse button was just pressed!  Let's see where the user clicked!
@@ -1028,7 +1027,7 @@ void mousePressed() {
 void SavefileSelected(File selection) {    // SAVE FILE
   if (selection == null) {
     // If a file was not selected
-    println("No output file was selected...");
+    //println("No output file was selected...");
     //       ErrorDisplay = "ERROR: NO FILE NAME CHOSEN.";
 
     UIMessage.label = "File not saved (reason: no file name chosen).";
@@ -1053,7 +1052,7 @@ void SavefileSelected(File selection) {    // SAVE FILE
       savePath = savePath + ".rrt";
 
     // If a file was selected, print path to folder 
-    println("Save file: " + savePath); 
+    //println("Save file: " + savePath); 
 
     int listLength = ToDoList.length; 
     for ( int i = 0; i < listLength; ++i) {
@@ -1075,7 +1074,7 @@ void SavefileSelected(File selection) {    // SAVE FILE
 
 void fileSelected(File selection) {    // LOAD (OPEN) FILE
   if (selection == null) {
-    println("Window was closed or the user hit cancel.");
+    //println("Window was closed or the user hit cancel.");
 
     UIMessage.label = "File not loaded (reason: no file selected).";
     UIMessageExpire = millis() + 3000;
@@ -1086,7 +1085,7 @@ void fileSelected(File selection) {    // LOAD (OPEN) FILE
     String loadPath = selection.getAbsolutePath();
 
     // If a file was selected, print path to file 
-    println("Loaded file: " + loadPath); 
+    //println("Loaded file: " + loadPath); 
 
     String[] p = splitTokens(loadPath, ".");
     boolean fileOK = false;
@@ -1098,7 +1097,7 @@ void fileSelected(File selection) {    // LOAD (OPEN) FILE
     if ( p[p.length - 1].equals("rrt"))
       fileOK = true;      
 
-    println("File OK: " + fileOK); 
+    //println("File OK: " + fileOK); 
 
     if (fileOK) {
 
@@ -1119,7 +1118,7 @@ void fileSelected(File selection) {    // LOAD (OPEN) FILE
 
       drawToDoList();
 
-      println("there are " + lines.length + " lines");
+      //println("there are " + lines.length + " lines");
       for (int i = 0 ; i < lines.length; i++) { 
         todoNew = parseInt(lines[i]);
         //        println(str(todoNew));
@@ -1144,9 +1143,8 @@ void fileSelected(File selection) {    // LOAD (OPEN) FILE
 
 void mouseDragged() { 
 
-  int i, j;
+  int i;
   int posOld, posNew;
-  int tempPos;
 
   boolean addpoint = false;
   float distTemp = 0;
@@ -1218,8 +1216,6 @@ void keyReleased()
 void keyPressed()
 {
 
-  int nx = 0;
-  int ny = 0;
 
   if (key == CODED) {
 
