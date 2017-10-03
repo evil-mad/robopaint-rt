@@ -122,25 +122,25 @@ void checkHighlights() {
     int x2 = -1;
 
     // Check for mouse over water dishes:
-    if (mouseX < WaterDishX + (WaterDishDia/2))
+    if (mouseX < WaterDishX + (WaterDishDia/2) + offset_left)
     {
       // Mouse is far enough left to be over the water dishes.
       for (i = 0; i < 3; i++) { 
         tempFloat = WaterDishY0 + i * WaterDishyD - ( WaterDishDia / 2);
-        if ((mouseY > tempFloat ) && (mouseY < (tempFloat + WaterDishDia)))
+        if ((mouseY > tempFloat - offset_top ) && (mouseY < (tempFloat + WaterDishDia) + offset_top))
         {
           x1 = i;
           break;
         }
       }
     }
-    else if ((mouseX > paintSwatchX - (paintSwatchOvalWidth /2) ) &&
-      (mouseX < paintSwatchX + (paintSwatchOvalWidth / 2)))
+    else if ((mouseX > paintSwatchX - (paintSwatchOvalWidth /2) - offset_left) &&
+      (mouseX < paintSwatchX + (paintSwatchOvalWidth / 2) + offset_left))
     {   // Check for mouse over paint swatches:
 
       for ( i = 0; i < 8; i++) { 
         tempFloat = paintSwatchY0 + i * paintSwatchyD - ( paintSwatchOvalheight / 2);
-        if ((mouseY > tempFloat ) && (mouseY < (tempFloat + paintSwatchOvalheight)))
+        if ((mouseY > tempFloat - offset_top ) && (mouseY < (tempFloat + paintSwatchOvalheight) + offset_top))
         {
           x2 = i;
           break;
@@ -164,9 +164,9 @@ void checkHighlights() {
 
 
   // Manage highlighting of text buttons
-  if ((mouseY >= MousePaperBottom)  || (mouseY < MousePaperTop)  )
+  if ((mouseY >= MousePaperBottom- offset_top)   || (mouseY < MousePaperTop+offset_top)  )
   {
-    if ((mouseY <= height)  && (mouseX >=  (MousePaperLeft - 50)))
+    if ((mouseY <= height+offset_top)  && (mouseX >=  (MousePaperLeft - 50)-offset_left))
     { 
       redrawButtons();
     }
@@ -177,4 +177,3 @@ void checkHighlights() {
     redrawHighlight();
   }
 }
-

@@ -152,7 +152,7 @@ void getWater()
 
     xC = 0; // Always use brush X rest position as over top water dish; x is not changed.
     yC = round((WaterDishY0 + waterDish * WaterDishyD - yBrushRestPositionPixels) * MotorStepsPerPixel);
-    yD = round((WaterDishDia * MotorStepsPerPixel)/4);
+    yD = round((WaterDishDia * MotorStepsPerPixel)/3);
 
     boolean done = false;
 
@@ -340,13 +340,12 @@ void getPaint()
 
 
     int paintColor = PaintDest;
-    boolean done = false;
     //    if (debugMode) println("Get Paint!  Color: " + paintColor);
 
 
     // Center positions:
-    xC = round((paintSwatchX - xBrushRestPositionPixels)* MotorStepsPerPixel);
-    yC = round((paintSwatchY0 + paintColor * paintSwatchyD - yBrushRestPositionPixels) * MotorStepsPerPixel);
+    xC = round((offset_left+paintSwatchX - xBrushRestPositionPixels) * MotorStepsPerPixel);
+    yC = round((offset_top+paintSwatchY0 + paintColor * paintSwatchyD - yBrushRestPositionPixels) * MotorStepsPerPixel);
 
     // xDelta, yDelta:
     xD = round((paintSwatchOvalWidth * MotorStepsPerPixel)/3);
@@ -430,4 +429,3 @@ void zero()
 
   //  if (debugMode) println("Motor X: " + MotorX + "  Motor Y: " + MotorY);
 }
-
